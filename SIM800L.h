@@ -8,10 +8,13 @@ class SIM800L {
 public:
     SIM800L(int rxPin, int txPin);
     void begin(long baudRate);
+    
     void initialize();
     void connectGPRS(const String& apn, const String& apnUser = "", const String& apnPass = "");
+    void readStoredMessage(int index);
     void handleIncomingMessages();
     void sendPostRequest(const String& phoneNumber, const String& messageContent);
+   
 
 private:
     SoftwareSerial sim800;

@@ -11,6 +11,8 @@ void SIM800L::initialize() {
     sendATCommand("AT");
     sendATCommand("AT+CMGF=1"); // Set SMS to text mode
     sendATCommand("AT+CNMI=3,2,0,1,0"); // Configure the module to notify new SMS via serial
+    sendATCommand("AT+CPMS=\"SM\",\"SM\",\"SM\"");
+   
 }
 
 void SIM800L::connectGPRS(const String& apn, const String& apnUser, const String& apnPass) {
@@ -42,6 +44,8 @@ void SIM800L::handleIncomingMessages() {
 }
 
 void SIM800L::sendPostRequest(const String& phoneNumber, const String& messageContent) {
+
+     Serial.println("HTTP request data" + phoneNumber + messageContent);
     DynamicJsonDocument jsonDoc(256);
     jsonDoc["phone_from"] = "8849384442";  // Replace with the actual sender phone number
     jsonDoc["phone_to"] = phoneNumber;
@@ -87,4 +91,22 @@ String SIM800L::getPhoneNumber(const String& sms) {
 String SIM800L::getMessageContent(const String& sms) {
     int index1 = sms.indexOf("\r\n", sms.indexOf("\r\n") + 2);
     return sms.substring(index1 + 2);
+}
+
+void SIM800L::readStoredMessage(int index) {
+    sendATCommand("AT+CMGR=ALL" + String(index));
+    if (sim800.available()) {
+        String smsContent = sim800.readString();
+        Serial.println("Stored SMS: " + smsContent);
+
+        // Extract phone number and message content
+        String phoneNumber = getPhoneNumber(smsContent);
+        String messageContent = getMessageContent(smsContent);
+
+        Serial.println("Extracted phone number: " + phoneNumber);
+        Serial.println("Extracted message content: " + messageContent);
+
+        // Send HTTP POST request
+        sendPostRequest(phoneNumber, messageContent);
+    }
 }
