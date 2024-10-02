@@ -24,7 +24,7 @@
 int parse_status_code(const char *response);
 void handle_http_status_code(int status_code);
 void blinkLED(int interval_ms);
-static const char *TAG = "SIM800L";
+static const char *TAG = "SIM800f";
 static QueueHandle_t sms_queue;
 
 void init_uart() {
